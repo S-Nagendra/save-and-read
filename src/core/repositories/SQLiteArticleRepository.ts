@@ -10,7 +10,7 @@ export class SQLiteArticleRepository implements ArticleRepository {
   async getFeed(): Promise<Article[]> {
     const db = await getDatabase();
 
-    const result = await db.getAllAsync<Article>(
+    const rows = await db.getAllAsync<any>(
       `
       SELECT *
       FROM articles
@@ -18,7 +18,31 @@ export class SQLiteArticleRepository implements ArticleRepository {
       `,
     );
 
-    return result.map(this.mapToArticle);
+    return rows.map((row) => ({
+      id: row.id,
+
+      title: row.title,
+
+      summary: row.summary,
+
+      body: row.body,
+
+      imageUrl: row.image_url,
+
+      localImagePath: row.local_image_path,
+
+      isSaved: Boolean(row.is_saved),
+
+      isRead: Boolean(row.is_read),
+
+      isDownloaded: Boolean(row.is_downloaded),
+
+      updatedAt: row.updated_at,
+
+      version: row.version,
+
+      syncStatus: row.sync_status,
+    }));
   }
 
   async getArticle(id: string): Promise<Article | null> {
@@ -168,43 +192,65 @@ export class SQLiteArticleRepository implements ArticleRepository {
   }
 
   async refreshFeed(): Promise<void> {
-    const articles = await fetchArticles();
+    const remoteArticles = await fetchArticles();
 
     const db = await getDatabase();
 
-    for (const article of articles) {
+    for (const article of remoteArticles) {
       await db.runAsync(
         `
-        INSERT OR REPLACE INTO articles
-        (
-          id,
-          title,
-          summary,
-          body,
-          image_url,
-          local_image_path,
-          is_saved,
-          is_read,
-          is_downloaded,
-          updated_at,
-          version,
-          sync_status
-        )
-        VALUES
-        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `,
+      INSERT INTO articles
+      (
+        id,
+        title,
+        summary,
+        body,
+        image_url,
+        local_image_path,
+        is_saved,
+        is_read,
+        is_downloaded,
+        updated_at,
+        version,
+        sync_status
+      )
+
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+
+      ON CONFLICT(id)
+      DO UPDATE SET
+
+        title = excluded.title,
+        summary = excluded.summary,
+        body = excluded.body,
+        image_url = excluded.image_url,
+        updated_at = excluded.updated_at,
+        version = excluded.version,
+        sync_status = excluded.sync_status
+      `,
         [
           article.id,
+
           article.title,
+
           article.summary,
+
           article.body ?? null,
+
           article.imageUrl,
+
           article.localImagePath ?? null,
+
           article.isSaved ? 1 : 0,
+
           article.isRead ? 1 : 0,
+
           article.isDownloaded ? 1 : 0,
+
           article.updatedAt,
+
           article.version,
+
           article.syncStatus,
         ],
       );
