@@ -3,3 +3,4 @@ export {
   setArticles,
   setLoading,
 } from "./articleSlice";
+export { loadArticles } from "./articleThunks";
