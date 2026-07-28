@@ -1,1 +1,2 @@
-export { ArticleRepository } from "./ArticleRepository";
+export * from "./ArticleRepository";
+export * from "./SQLiteArticleRepository";
