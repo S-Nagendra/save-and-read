@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet } from "react-native";
+import { View, Text, Pressable, StyleSheet, Button } from "react-native";
 
 import { Article } from "@/core/models/Article";
 
@@ -6,11 +6,16 @@ interface Props {
   article: Article;
 
   onReadToggle: (id: string) => void;
-
   onSaveToggle: (id: string) => void;
+  onDownload: (id: string) => void;
 }
 
-export function ArticleCard({ article, onReadToggle, onSaveToggle }: Props) {
+export function ArticleCard({
+  article,
+  onReadToggle,
+  onSaveToggle,
+  onDownload,
+}: Props) {
   return (
     <View style={styles.card}>
       <Text style={styles.title}>{article.title}</Text>
@@ -25,6 +30,10 @@ export function ArticleCard({ article, onReadToggle, onSaveToggle }: Props) {
         <Pressable onPress={() => onSaveToggle(article.id)}>
           <Text>{article.isSaved ? "Unsave" : "Save"}</Text>
         </Pressable>
+        <Button
+          title={article.isDownloaded ? "Downloaded" : "Download"}
+          onPress={() => onDownload(article.id)}
+        />
       </View>
     </View>
   );

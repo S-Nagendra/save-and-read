@@ -3,6 +3,7 @@ import { ArticleRepository } from "./ArticleRepository";
 import { getDatabase } from "@/core/database";
 import { fetchArticles } from "@/mock";
 import { SQLiteOutboxRepository } from "./SQLiteOutboxRepository";
+import { downloadArticleContent } from "@/core/services/DownloadService";
 
 export class SQLiteArticleRepository implements ArticleRepository {
   private outboxRepository = new SQLiteOutboxRepository();
@@ -179,15 +180,34 @@ export class SQLiteArticleRepository implements ArticleRepository {
   async downloadArticle(id: string): Promise<void> {
     const db = await getDatabase();
 
+    const article = await this.getArticle(id);
+
+    if (!article) {
+      throw new Error("Article not found");
+    }
+
+    const downloadedArticle = await downloadArticleContent(article);
+
     await db.runAsync(
       `
-      UPDATE articles
-      SET
-        is_downloaded = 1,
-        updated_at = ?
-      WHERE id = ?
-      `,
-      [new Date().toISOString(), id],
+    UPDATE articles
+
+    SET
+      local_image_path = ?,
+      is_downloaded = ?,
+      updated_at = ?
+
+    WHERE id = ?
+    `,
+      [
+        downloadedArticle.localImagePath ?? null,
+
+        downloadedArticle.isDownloaded ? 1 : 0,
+
+        downloadedArticle.updatedAt,
+
+        id,
+      ],
     );
   }
 
@@ -255,6 +275,8 @@ export class SQLiteArticleRepository implements ArticleRepository {
         ],
       );
     }
+
+    this.debugArticles();
   }
 
   private mapToArticle(row: any): Article {
@@ -283,5 +305,13 @@ export class SQLiteArticleRepository implements ArticleRepository {
 
       syncStatus: row.sync_status,
     };
+  }
+
+  async debugArticles() {
+    const db = await getDatabase();
+
+    const rows = await db.getAllAsync("SELECT * FROM articles");
+
+    console.log("SQLite Articles:", rows);
   }
 }

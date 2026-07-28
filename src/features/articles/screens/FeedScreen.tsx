@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 
 import {
   View,
@@ -17,6 +17,7 @@ import {
   saveArticle,
   unsaveArticle,
   loadArticles,
+  downloadArticle,
 } from "@/features/articles";
 
 export function FeedScreen() {
@@ -52,6 +53,10 @@ export function FeedScreen() {
     }
   };
 
+  const handleDownload = (id: string) => {
+    dispatch(downloadArticle(id));
+  };
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -62,6 +67,7 @@ export function FeedScreen() {
             article={item}
             onReadToggle={() => handleReadToggle(item.id, item.isRead)}
             onSaveToggle={() => handleSaveToggle(item.id, item.isSaved)}
+            onDownload={handleDownload}
           />
         )}
       />

@@ -7,27 +7,23 @@ import { setArticles, setLoading } from "./articleSlice";
 export const loadArticles = createAsyncThunk(
   "articles/load",
   async (_, { dispatch }) => {
-    dispatch(setLoading(true));
+    // 1. Load local data first
 
-    // First read local database
+    const cached = await articleRepository.getFeed();
 
-    let articles = await articleRepository.getFeed();
+    dispatch(setArticles(cached));
 
-    // Show cached data immediately
+    // 2. Try refresh from server
 
-    dispatch(setArticles(articles));
+    try {
+      await articleRepository.refreshFeed();
 
-    // Refresh from remote
+      const updated = await articleRepository.getFeed();
 
-    await articleRepository.refreshFeed();
-
-    // Read updated local data
-
-    articles = await articleRepository.getFeed();
-
-    dispatch(setArticles(articles));
-
-    dispatch(setLoading(false));
+      dispatch(setArticles(updated));
+    } catch (error) {
+      console.log("Offline mode - using cache");
+    }
   },
 );
 
@@ -68,6 +64,18 @@ export const unsaveArticle = createAsyncThunk(
   "articles/unsave",
   async (id: string, { dispatch }) => {
     await articleRepository.unsaveArticle(id);
+
+    const articles = await articleRepository.getFeed();
+
+    dispatch(setArticles(articles));
+  },
+);
+
+export const downloadArticle = createAsyncThunk(
+  "articles/download",
+
+  async (id: string, { dispatch }) => {
+    await articleRepository.downloadArticle(id);
 
     const articles = await articleRepository.getFeed();
 

@@ -3,6 +3,10 @@ import { store } from "@/app/store";
 import { FeedScreen } from "@/features/articles";
 import { useEffect } from "react";
 import { Provider } from "react-redux";
+import { StatusBar } from "expo-status-bar";
+import {
+  SafeAreaProvider,
+} from "react-native-safe-area-context";
 
 export default function App() {
   useEffect(() => {
@@ -10,8 +14,11 @@ export default function App() {
   }, []);
 
   return (
-    <Provider store={store}>
-      <FeedScreen />
-    </Provider>
+    <SafeAreaProvider>
+      <StatusBar style="auto" />
+      <Provider store={store}>
+        <FeedScreen />
+      </Provider>
+    </SafeAreaProvider>
   );
 }
