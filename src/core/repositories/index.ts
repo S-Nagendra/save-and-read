@@ -1,1 +1,1 @@
-export {};
+export { ArticleRepository } from "./ArticleRepository";
