@@ -8,7 +8,7 @@ import {
 
 let database: SQLite.SQLiteDatabase | null = null;
 
-export async function getDatabase() {
+export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
   if (database) {
     return database;
   }
