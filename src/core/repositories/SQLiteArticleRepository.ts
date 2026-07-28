@@ -2,8 +2,11 @@ import { Article } from "@/core/models/Article";
 import { ArticleRepository } from "./ArticleRepository";
 import { getDatabase } from "@/core/database";
 import { fetchArticles } from "@/mock";
+import { SQLiteOutboxRepository } from "./SQLiteOutboxRepository";
 
 export class SQLiteArticleRepository implements ArticleRepository {
+  private outboxRepository = new SQLiteOutboxRepository();
+
   async getFeed(): Promise<Article[]> {
     const db = await getDatabase();
 
@@ -40,6 +43,8 @@ export class SQLiteArticleRepository implements ArticleRepository {
   async saveArticle(id: string): Promise<void> {
     const db = await getDatabase();
 
+    const now = new Date().toISOString();
+
     await db.runAsync(
       `
       UPDATE articles
@@ -49,12 +54,24 @@ export class SQLiteArticleRepository implements ArticleRepository {
         updated_at = ?
       WHERE id = ?
       `,
-      [new Date().toISOString(), id],
+      [now, id],
     );
+
+    await this.outboxRepository.add({
+      id: crypto.randomUUID(),
+
+      articleId: id,
+
+      action: "SAVE_ARTICLE",
+
+      createdAt: now,
+    });
   }
 
   async unsaveArticle(id: string): Promise<void> {
     const db = await getDatabase();
+
+    const now = new Date().toISOString();
 
     await db.runAsync(
       `
@@ -65,40 +82,74 @@ export class SQLiteArticleRepository implements ArticleRepository {
         updated_at = ?
       WHERE id = ?
       `,
-      [new Date().toISOString(), id],
+      [now, id],
     );
+
+    await this.outboxRepository.add({
+      id: crypto.randomUUID(),
+
+      articleId: id,
+
+      action: "UNSAVE_ARTICLE",
+
+      createdAt: now,
+    });
   }
 
   async markAsRead(id: string): Promise<void> {
     const db = await getDatabase();
 
+    const now = new Date().toISOString();
+
     await db.runAsync(
       `
-      UPDATE articles
-      SET
-        is_read = 1,
-        sync_status = 'pending',
-        updated_at = ?
-      WHERE id = ?
-      `,
-      [new Date().toISOString(), id],
+    UPDATE articles
+    SET
+      is_read = 1,
+      sync_status = 'pending',
+      updated_at = ?
+    WHERE id = ?
+    `,
+      [now, id],
     );
+
+    await this.outboxRepository.add({
+      id: crypto.randomUUID(),
+
+      articleId: id,
+
+      action: "MARK_READ",
+
+      createdAt: now,
+    });
   }
 
   async markAsUnread(id: string): Promise<void> {
     const db = await getDatabase();
 
+    const now = new Date().toISOString();
+
     await db.runAsync(
       `
-      UPDATE articles
-      SET
-        is_read = 0,
-        sync_status = 'pending',
-        updated_at = ?
-      WHERE id = ?
-      `,
-      [new Date().toISOString(), id],
+    UPDATE articles
+    SET
+      is_read = 0,
+      sync_status = 'pending',
+      updated_at = ?
+    WHERE id = ?
+    `,
+      [now, id],
     );
+
+    await this.outboxRepository.add({
+      id: crypto.randomUUID(),
+
+      articleId: id,
+
+      action: "MARK_UNREAD",
+
+      createdAt: now,
+    });
   }
 
   async downloadArticle(id: string): Promise<void> {
