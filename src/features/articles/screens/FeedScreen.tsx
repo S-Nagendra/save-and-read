@@ -17,6 +17,7 @@ import {
   downloadArticle,
 } from "@/features/articles";
 import { RootStackParamList } from "@/app/navigation";
+import { eventBus } from "@/core/events/EventBus";
 
 export function FeedScreen() {
   const dispatch = useAppDispatch();
@@ -28,7 +29,16 @@ export function FeedScreen() {
 
   useEffect(() => {
     dispatch(loadArticles());
-  }, [dispatch]);
+    const reload = () => {
+      dispatch(loadArticles());
+    };
+
+    eventBus.on("syncCompleted", reload);
+
+    return () => {
+      eventBus.off("syncCompleted", reload);
+    };
+  }, []);
 
   if (loading && items.length === 0) {
     return (

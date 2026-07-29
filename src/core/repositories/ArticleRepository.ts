@@ -40,4 +40,6 @@ export interface ArticleRepository {
    * Refresh feed from remote source.
    */
   refreshFeed(): Promise<void>;
+
+  updateSyncStatus(ids: string[]): Promise<void>;
 }

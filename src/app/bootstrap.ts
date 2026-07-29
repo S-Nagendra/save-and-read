@@ -1,6 +1,6 @@
 import { SyncCoordinator } from "@/core/sync/SyncCoordinator";
 
-const syncCoordinator = new SyncCoordinator();
+export const syncCoordinator = new SyncCoordinator();
 
 export function bootstrap() {
   syncCoordinator.start();

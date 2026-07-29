@@ -115,7 +115,6 @@ export class SQLiteArticleRepository implements ArticleRepository {
       action: "MARK_READ",
       createdAt: now,
     });
-
   }
 
   async markAsUnread(id: string): Promise<void> {
@@ -154,6 +153,8 @@ export class SQLiteArticleRepository implements ArticleRepository {
 
     const downloadedArticle = await downloadArticleContent(article);
 
+    console.log(downloadedArticle.localImagePath);
+    
     await db.runAsync(
       `
     UPDATE articles
@@ -249,6 +250,22 @@ export class SQLiteArticleRepository implements ArticleRepository {
       version: row.version,
       syncStatus: row.sync_status,
     };
+  }
+
+  async updateSyncStatus(ids: string[]): Promise<void> {
+    const db = await getDatabase();
+
+    for (const id of ids) {
+      await db.runAsync(
+        `
+    UPDATE articles
+    SET
+      sync_status = 'synced'
+    WHERE id = ?
+    `,
+        [id],
+      );
+    }
   }
 
   async debugArticles() {

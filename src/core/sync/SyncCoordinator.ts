@@ -7,7 +7,10 @@ export class SyncCoordinator {
   private syncEngine = new SyncEngine();
 
   start() {
+    console.log("Sync coordinator started");
+
     this.network.subscribe(async (isConnected) => {
+      console.log("Network status:", isConnected);
       if (isConnected) {
         await this.syncEngine.sync();
       }
@@ -15,6 +18,7 @@ export class SyncCoordinator {
   }
 
   stop() {
+    console.log("Sync coordinator stopped");
     this.network.destroy();
   }
 }

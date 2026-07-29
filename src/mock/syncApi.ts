@@ -1,13 +1,13 @@
 import { PendingAction } from "@/core/models/PendingAction";
 
-export async function syncActions(actions: PendingAction[]): Promise<string[]> {
+export async function syncActions(actions: PendingAction[]): Promise<PendingAction[]> {
   // simulate network delay
 
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
   console.log("Syncing actions:", actions);
 
-  // return successfully processed IDs
+  // Assume all actions synced successfully
 
-  return actions.map((action) => action.id);
+  return actions;
 }

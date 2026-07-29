@@ -35,6 +35,14 @@ export function ArticleCard({
             {article.summary}
           </Text>
 
+          <View style={styles.syncStatus}>
+            <Text>
+              {article.syncStatus === "pending"
+                ? "⟳ Waiting for sync"
+                : "✓ Synced"}
+            </Text>
+          </View>
+
           <View style={styles.statusRow}>
             {article.isRead && <Text style={styles.status}>Read</Text>}
 
@@ -128,6 +136,11 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: 10,
     backgroundColor: "#eee",
+  },
+
+  syncStatus:{
+    marginTop:8,
+    marginBottom:8,
   },
 
   actions: {
