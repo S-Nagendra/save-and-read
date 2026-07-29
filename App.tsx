@@ -1,12 +1,12 @@
 import { bootstrap } from "@/app/bootstrap";
 import { store } from "@/app/store";
-import { FeedScreen } from "@/features/articles";
 import { useEffect } from "react";
 import { Provider } from "react-redux";
 import { StatusBar } from "expo-status-bar";
 import {
   SafeAreaProvider,
 } from "react-native-safe-area-context";
+import { AppNavigator } from "@/app/navigation";
 
 export default function App() {
   useEffect(() => {
@@ -17,7 +17,7 @@ export default function App() {
     <SafeAreaProvider>
       <StatusBar style="auto" />
       <Provider store={store}>
-        <FeedScreen />
+        <AppNavigator />
       </Provider>
     </SafeAreaProvider>
   );

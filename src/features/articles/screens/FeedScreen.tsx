@@ -1,12 +1,9 @@
 import { useEffect } from "react";
 
-import {
-  View,
-  Text,
-  FlatList,
-  StyleSheet,
-  ActivityIndicator,
-} from "react-native";
+import { View, FlatList, StyleSheet, ActivityIndicator } from "react-native";
+
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useNavigation } from "@react-navigation/native";
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 
@@ -19,11 +16,15 @@ import {
   loadArticles,
   downloadArticle,
 } from "@/features/articles";
+import { RootStackParamList } from "@/app/navigation";
 
 export function FeedScreen() {
   const dispatch = useAppDispatch();
 
   const { items, loading } = useAppSelector((state) => state.articles);
+
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   useEffect(() => {
     dispatch(loadArticles());
@@ -57,6 +58,12 @@ export function FeedScreen() {
     dispatch(downloadArticle(id));
   };
 
+  const handleOpenArticle = (id: string) => {
+    navigation.navigate("ArticleDetail", {
+      articleId: id,
+    });
+  };
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -65,6 +72,7 @@ export function FeedScreen() {
         renderItem={({ item }) => (
           <ArticleCard
             article={item}
+            onPress={handleOpenArticle}
             onReadToggle={() => handleReadToggle(item.id, item.isRead)}
             onSaveToggle={() => handleSaveToggle(item.id, item.isSaved)}
             onDownload={handleDownload}

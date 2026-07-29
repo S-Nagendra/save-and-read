@@ -1,4 +1,11 @@
-import { View, Text, Pressable, StyleSheet, Button } from "react-native";
+import {
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
+  Button,
+  TouchableOpacity,
+} from "react-native";
 
 import { Article } from "@/core/models/Article";
 
@@ -8,6 +15,7 @@ interface Props {
   onReadToggle: (id: string) => void;
   onSaveToggle: (id: string) => void;
   onDownload: (id: string) => void;
+  onPress: (id: string) => void;
 }
 
 export function ArticleCard({
@@ -15,9 +23,13 @@ export function ArticleCard({
   onReadToggle,
   onSaveToggle,
   onDownload,
+  onPress,
 }: Props) {
   return (
-    <View style={styles.card}>
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() => onPress(article.id)}
+    >
       <Text style={styles.title}>{article.title}</Text>
 
       <Text>{article.summary}</Text>
@@ -35,7 +47,7 @@ export function ArticleCard({
           onPress={() => onDownload(article.id)}
         />
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 

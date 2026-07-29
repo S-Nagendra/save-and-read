@@ -13,3 +13,4 @@ export {
 } from "./articleThunks";
 export { FeedScreen } from "./screens/FeedScreen";
 export { ArticleCard } from "./components/ArticleCard";
+export { ArticleDetailScreen } from "./screens/ArticleDetail";
