@@ -1,10 +1,10 @@
 import { Article } from "@/core/models/Article";
 import { ArticleRepository } from "./ArticleRepository";
 import { getDatabase } from "@/core/database";
-import { fetchArticles } from "@/mock";
 import { SQLiteOutboxRepository } from "./SQLiteOutboxRepository";
 import { downloadArticleContent } from "@/core/services/DownloadService";
 import { generateId } from "@/shared/utils";
+import { fetchArticles } from "@/mock";
 
 export class SQLiteArticleRepository implements ArticleRepository {
   private outboxRepository = new SQLiteOutboxRepository();

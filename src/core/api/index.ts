@@ -1,1 +1,0 @@
-export { fetchArticles } from "./articleApi";
