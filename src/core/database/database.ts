@@ -5,10 +5,11 @@ import {
   CREATE_PENDING_ACTIONS_TABLE,
   CREATE_SYNC_METADATA_TABLE,
 } from "./schema";
+import { runMigrations } from "./migrationRunner";
 
 let database: Promise<SQLite.SQLiteDatabase> | null = null;
 
-export function getDatabase() {
+export async function getDatabase() {
   if (!database) {
     database = initializeDatabase();
   }
@@ -24,6 +25,8 @@ async function initializeDatabase() {
   await db.execAsync(CREATE_PENDING_ACTIONS_TABLE);
 
   await db.execAsync(CREATE_SYNC_METADATA_TABLE);
+
+  await runMigrations(db);
 
   console.log("Database ready");
 

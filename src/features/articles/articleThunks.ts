@@ -9,13 +9,16 @@ export const loadArticles = createAsyncThunk(
   async (_, { dispatch }) => {
     // 1. Load local data first
 
+    dispatch(setLoading(true));
     const cached = await articleRepository.getFeed();
 
+    dispatch(setLoading(false));
     dispatch(setArticles(cached));
 
     // 2. Try refresh from server
 
     try {
+      
       await articleRepository.refreshFeed();
 
       const updated = await articleRepository.getFeed();

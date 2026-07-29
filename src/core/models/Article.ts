@@ -17,6 +17,8 @@ export interface Article {
 
   isDownloaded: boolean;
 
+  createdAt: string;
+
   updatedAt: string;
 
   // version helps with conflict resolution

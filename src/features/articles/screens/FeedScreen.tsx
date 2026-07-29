@@ -39,6 +39,7 @@ export function FeedScreen() {
   }
 
   const handleReadToggle = (id: string, isRead: boolean) => {
+    console.log("handle read toggle", isRead);
     if (isRead) {
       dispatch(markArticleUnread(id));
     } else {
@@ -47,6 +48,7 @@ export function FeedScreen() {
   };
 
   const handleSaveToggle = (id: string, isSaved: boolean) => {
+    console.log("handle save toggle", id, isSaved);
     if (isSaved) {
       dispatch(unsaveArticle(id));
     } else {
@@ -59,6 +61,7 @@ export function FeedScreen() {
   };
 
   const handleOpenArticle = (id: string) => {
+    console.log("handle open article");
     navigation.navigate("ArticleDetail", {
       articleId: id,
     });

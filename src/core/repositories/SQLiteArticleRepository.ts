@@ -4,6 +4,7 @@ import { getDatabase } from "@/core/database";
 import { fetchArticles } from "@/mock";
 import { SQLiteOutboxRepository } from "./SQLiteOutboxRepository";
 import { downloadArticleContent } from "@/core/services/DownloadService";
+import { generateId } from "@/shared/utils";
 
 export class SQLiteArticleRepository implements ArticleRepository {
   private outboxRepository = new SQLiteOutboxRepository();
@@ -15,35 +16,11 @@ export class SQLiteArticleRepository implements ArticleRepository {
       `
       SELECT *
       FROM articles
-      ORDER BY updated_at DESC
+      ORDER BY created_at DESC
       `,
     );
 
-    return rows.map((row) => ({
-      id: row.id,
-
-      title: row.title,
-
-      summary: row.summary,
-
-      body: row.body,
-
-      imageUrl: row.image_url,
-
-      localImagePath: row.local_image_path,
-
-      isSaved: Boolean(row.is_saved),
-
-      isRead: Boolean(row.is_read),
-
-      isDownloaded: Boolean(row.is_downloaded),
-
-      updatedAt: row.updated_at,
-
-      version: row.version,
-
-      syncStatus: row.sync_status,
-    }));
+    return rows.map((row) => this.mapToArticle(row));
   }
 
   async getArticle(id: string): Promise<Article | null> {
@@ -83,12 +60,9 @@ export class SQLiteArticleRepository implements ArticleRepository {
     );
 
     await this.outboxRepository.add({
-      id: crypto.randomUUID(),
-
+      id: generateId(),
       articleId: id,
-
       action: "SAVE_ARTICLE",
-
       createdAt: now,
     });
   }
@@ -111,12 +85,9 @@ export class SQLiteArticleRepository implements ArticleRepository {
     );
 
     await this.outboxRepository.add({
-      id: crypto.randomUUID(),
-
+      id: generateId(),
       articleId: id,
-
       action: "UNSAVE_ARTICLE",
-
       createdAt: now,
     });
   }
@@ -139,14 +110,12 @@ export class SQLiteArticleRepository implements ArticleRepository {
     );
 
     await this.outboxRepository.add({
-      id: crypto.randomUUID(),
-
+      id: generateId(),
       articleId: id,
-
       action: "MARK_READ",
-
       createdAt: now,
     });
+
   }
 
   async markAsUnread(id: string): Promise<void> {
@@ -167,12 +136,9 @@ export class SQLiteArticleRepository implements ArticleRepository {
     );
 
     await this.outboxRepository.add({
-      id: crypto.randomUUID(),
-
+      id: generateId(),
       articleId: id,
-
       action: "MARK_UNREAD",
-
       createdAt: now,
     });
   }
@@ -201,11 +167,8 @@ export class SQLiteArticleRepository implements ArticleRepository {
     `,
       [
         downloadedArticle.localImagePath ?? null,
-
         downloadedArticle.isDownloaded ? 1 : 0,
-
         downloadedArticle.updatedAt,
-
         id,
       ],
     );
@@ -219,58 +182,49 @@ export class SQLiteArticleRepository implements ArticleRepository {
     for (const article of remoteArticles) {
       await db.runAsync(
         `
-      INSERT INTO articles
-      (
-        id,
-        title,
-        summary,
-        body,
-        image_url,
-        local_image_path,
-        is_saved,
-        is_read,
-        is_downloaded,
-        updated_at,
-        version,
-        sync_status
-      )
+        INSERT INTO articles
+        (
+          id,
+          title,
+          summary,
+          body,
+          image_url,
+          local_image_path,
+          created_at,
+          updated_at,
+          is_saved,
+          is_read,
+          is_downloaded,
+          version,
+          sync_status
+        )
 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 
-      ON CONFLICT(id)
-      DO UPDATE SET
+        ON CONFLICT(id)
+        DO UPDATE SET
 
-        title = excluded.title,
-        summary = excluded.summary,
-        body = excluded.body,
-        image_url = excluded.image_url,
-        updated_at = excluded.updated_at,
-        version = excluded.version,
-        sync_status = excluded.sync_status
-      `,
+          title = excluded.title,
+          summary = excluded.summary,
+          body = excluded.body,
+          image_url = excluded.image_url,
+          updated_at = excluded.updated_at,
+          version = excluded.version,
+          sync_status = excluded.sync_status
+        `,
         [
           article.id,
-
           article.title,
-
           article.summary,
-
           article.body ?? null,
-
           article.imageUrl,
-
           article.localImagePath ?? null,
-
-          article.isSaved ? 1 : 0,
-
-          article.isRead ? 1 : 0,
-
-          article.isDownloaded ? 1 : 0,
-
+          article.createdAt,
           article.updatedAt,
-
+          article.isSaved ? 1 : 0,
+          article.isRead ? 1 : 0,
+          article.isDownloaded ? 1 : 0,
           article.version,
-
           article.syncStatus,
         ],
       );
@@ -282,27 +236,17 @@ export class SQLiteArticleRepository implements ArticleRepository {
   private mapToArticle(row: any): Article {
     return {
       id: row.id,
-
       title: row.title,
-
       summary: row.summary,
-
       body: row.body,
-
       imageUrl: row.image_url,
-
       localImagePath: row.local_image_path,
-
-      isSaved: Boolean(row.is_saved),
-
-      isRead: Boolean(row.is_read),
-
-      isDownloaded: Boolean(row.is_downloaded),
-
+      createdAt: row.created_at,
       updatedAt: row.updated_at,
-
+      isSaved: Boolean(row.is_saved),
+      isRead: Boolean(row.is_read),
+      isDownloaded: Boolean(row.is_downloaded),
       version: row.version,
-
       syncStatus: row.sync_status,
     };
   }

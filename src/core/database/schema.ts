@@ -1,3 +1,5 @@
+import { SQLiteDatabase } from "expo-sqlite";
+
 export const CREATE_ARTICLES_TABLE = `
 CREATE TABLE IF NOT EXISTS articles (
   id TEXT PRIMARY KEY,
@@ -17,6 +19,8 @@ CREATE TABLE IF NOT EXISTS articles (
   is_read INTEGER DEFAULT 0,
 
   is_downloaded INTEGER DEFAULT 0,
+
+  created_at TEXT NOT NULL,
 
   updated_at TEXT NOT NULL,
 
@@ -47,3 +51,12 @@ CREATE TABLE IF NOT EXISTS sync_metadata (
   value TEXT
 );
 `;
+
+export async function createMigrationTable(db: SQLiteDatabase) {
+  await db.execAsync(`
+    CREATE TABLE IF NOT EXISTS schema_migrations (
+      id TEXT PRIMARY KEY,
+      applied_at TEXT NOT NULL
+    );
+  `);
+}
